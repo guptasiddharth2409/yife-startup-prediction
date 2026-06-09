@@ -1,0 +1,98 @@
+company_name,batch,industry_category,location,total_funding_usd,num_funding_rounds,team_size,faang_experience,elite_edu,ai_flag,tier1_vc_investor,success
+Airbnb,W09,Consumer,SF Bay,25000000,5,3,0,1,0,1,1
+Stripe,S09,FinTech,SF Bay,50000000,7,2,1,1,0,1,1
+Dropbox,S07,B2B,SF Bay,15000000,4,2,1,1,0,1,1
+Doordash,S13,Consumer,SF Bay,8000000,6,3,0,1,0,1,1
+Coinbase,S12,FinTech,SF Bay,3000000,4,2,1,1,0,1,1
+Instacart,S12,Consumer,SF Bay,4400000,5,3,0,0,0,1,1
+Gusto,W12,B2B,SF Bay,6000000,4,3,1,1,0,1,1
+Brex,W17,FinTech,SF Bay,7300000,5,2,0,0,0,1,1
+Scale AI,S16,AI,SF Bay,6000000,5,2,1,1,1,1,1
+OpenSea,W18,AI,SF Bay,2300000,4,2,0,0,1,1,1
+Postmates,S011,Consumer,SF Bay,750000,3,3,0,0,0,0,1
+Zapier,S12,DevTools,SF Bay,1400000,2,3,0,0,0,0,1
+Reddit,S05,Consumer,SF Bay,500000,3,2,1,1,0,0,1
+Twitch,W07,Consumer,SF Bay,1500000,3,3,0,0,0,1,1
+Cruise,W14,AI,SF Bay,20000000,4,4,1,1,1,1,1
+Lambda,W17,AI,SF Bay,1500000,3,2,1,1,1,0,1
+Replit,W18,DevTools,SF Bay,2000000,4,2,0,1,1,0,1
+Retool,W17,DevTools,SF Bay,4000000,3,2,1,1,0,1,1
+Linear,W20,DevTools,SF Bay,6500000,3,3,1,0,0,1,1
+Notion,W18,B2B,SF Bay,2000000,3,2,0,0,0,1,1
+Figma,S12,DevTools,SF Bay,3900000,4,2,0,1,0,1,1
+Mixpanel,S09,B2B,SF Bay,1000000,3,2,0,1,0,1,1
+PagerDuty,S10,B2B,SF Bay,2000000,4,3,1,1,0,1,1
+SendGrid,W09,B2B,SF Bay,5000000,3,2,0,0,0,1,1
+Cloudflare,S09,DevTools,SF Bay,2000000,4,2,1,1,0,1,1
+Gitlab,W15,DevTools,NY,1500000,4,2,0,0,0,1,1
+Segment,S11,B2B,SF Bay,600000,4,3,1,1,0,1,1
+MongoDB,S09,DevTools,NY,1000000,4,3,1,1,0,1,1
+Twilio,W08,DevTools,SF Bay,1200000,4,3,1,1,0,1,1
+Heroku,W08,DevTools,SF Bay,3000000,3,2,1,1,0,1,1
+Parse,W11,DevTools,SF Bay,7000000,3,3,1,1,0,1,1
+Appdynamics,S08,B2B,SF Bay,4000000,4,2,1,0,0,1,1
+Mulesoft,W07,B2B,SF Bay,3000000,5,3,1,0,0,1,1
+Palantir,S09,AI,SF Bay,90000000,5,4,1,1,1,1,1
+Anthropics,S21,AI,SF Bay,124000000,3,5,1,1,1,1,1
+Cohere,W21,AI,International,40000000,4,3,1,1,1,1,1
+Harvest,W07,B2B,NY,500000,1,2,0,0,0,0,1
+Bufferapp,W11,B2B,International,400000,2,2,0,0,0,0,1
+Producthunt,W14,Consumer,SF Bay,600000,2,1,0,0,0,0,1
+Amplitude,W12,B2B,SF Bay,1800000,4,3,1,1,0,1,1
+Robinhood,S13,FinTech,SF Bay,3000000,5,2,0,1,0,1,1
+Chime,S14,FinTech,SF Bay,18000000,5,2,0,1,0,1,1
+Plaid,S13,FinTech,SF Bay,2800000,4,2,1,1,0,1,1
+Sofi,S11,FinTech,SF Bay,1500000,5,3,0,1,0,1,1
+Klarna,W10,FinTech,International,9300000,6,3,0,0,0,1,1
+NuBank,W13,FinTech,International,14000000,6,3,0,1,0,1,1
+Airtable,W15,B2B,SF Bay,3000000,3,3,0,0,0,1,1
+Webflow,S13,DevTools,SF Bay,2900000,3,2,0,0,0,1,1
+Supabase,S20,DevTools,International,6000000,3,3,0,0,1,0,1
+Vercel,S20,DevTools,NY,21000000,4,3,1,0,1,1,1
+HuggingFace,W17,AI,NY,40000000,5,3,1,1,1,1,1
+Mistral,W23,AI,International,113000000,3,3,1,1,1,1,1
+Together AI,W23,AI,SF Bay,102500000,3,4,1,1,1,1,1
+Groq,W16,AI,SF Bay,367000000,5,4,1,1,1,1,1
+Perplexity,W23,AI,SF Bay,73500000,3,4,1,1,1,1,1
+Composer,W22,AI,SF Bay,3500000,2,2,0,1,1,0,1
+Lattice,W16,B2B,SF Bay,5000000,4,2,0,1,0,1,1
+Rippling,W17,B2B,SF Bay,45000000,4,3,1,1,0,1,1
+Deel,W19,B2B,SF Bay,14400000,5,2,0,0,0,1,1
+WorkOS,W19,DevTools,SF Bay,2800000,3,2,1,1,0,0,1
+Nango,W23,DevTools,International,4000000,2,2,0,0,1,0,0
+Langchain,W23,AI,SF Bay,25000000,3,3,1,1,1,1,1
+Midjourney,W22,AI,SF Bay,0,1,5,0,0,1,0,1
+Stability AI,W22,AI,International,101000000,2,4,0,0,1,1,1
+RunwayML,S18,AI,NY,50000000,4,3,0,1,1,1,1
+ElevenLabs,W22,AI,International,80000000,3,3,0,0,1,1,1
+Character AI,W23,AI,SF Bay,150000000,2,5,1,1,1,1,1
+Inflection AI,W23,AI,SF Bay,1300000000,1,5,1,1,1,1,1
+Adept AI,S22,AI,SF Bay,350000000,3,5,1,1,1,1,1
+AI21Labs,S21,AI,International,118000000,4,3,1,1,1,1,1
+Benchling,W12,Healthcare,SF Bay,14000000,5,2,1,1,0,1,1
+Momentus,W19,Other,SF Bay,3000000,3,3,0,0,0,0,0
+HopSkipDrive,W15,Consumer,SF Bay,4700000,4,3,0,0,0,0,0
+Aptible,W13,DevTools,SF Bay,800000,2,2,1,0,0,0,0
+Zemanta,W08,B2B,International,500000,2,2,0,0,0,0,0
+Kiddi,W12,Consumer,International,300000,1,2,0,0,0,0,0
+Gigster,S15,B2B,SF Bay,2000000,2,3,1,0,0,0,0
+Fabric,S19,Consumer,NY,2000000,2,2,0,0,0,0,0
+Auction.com,S08,Other,SF Bay,500000,2,3,0,0,0,0,0
+Codecademy,S11,Consumer,NY,2500000,3,3,0,1,0,0,1
+CourseHero,W10,Consumer,SF Bay,1500000,2,2,0,1,0,0,1
+Quora,S09,Consumer,SF Bay,1100000,3,2,1,1,0,1,1
+Productboard,W17,B2B,International,8000000,4,3,0,0,0,1,1
+Loom,W16,B2B,SF Bay,11300000,4,3,0,0,0,1,1
+Clerk,W22,DevTools,NY,4000000,2,3,1,0,1,0,1
+Neon,W21,DevTools,International,30000000,3,3,1,0,1,1,1
+Prisma,W19,DevTools,International,12000000,3,3,1,0,0,1,1
+Hashicorp,S12,DevTools,SF Bay,3400000,4,2,1,1,0,1,1
+DockerInc,S10,DevTools,SF Bay,2400000,4,3,1,0,0,1,1
+Netlify,S15,DevTools,SF Bay,2200000,3,3,1,0,0,1,1
+Datree,W21,DevTools,International,6200000,2,3,0,0,0,0,0
+Octant,W19,Healthcare,SF Bay,80000000,3,4,1,1,0,1,1
+Insitro,W18,Healthcare,SF Bay,143000000,3,4,1,1,1,1,1
+Recursion,S15,Healthcare,Other,239000000,6,4,1,1,1,1,1
+Bioptigen,S06,Healthcare,Other,3000000,3,3,0,1,0,0,0
+Biomason,S12,Other,Other,4000000,3,2,0,1,0,0,0
+Nanostring,S03,Healthcare,Other,1000000,4,3,0,1,0,0,1
