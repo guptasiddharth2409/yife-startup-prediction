@@ -1,183 +1,211 @@
-# YIFE: Predicting Early-Stage Startup Success Using ML
+# YIFE: YC-Inspired Feature Engineering for Startup Success Prediction
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![XGBoost](https://img.shields.io/badge/XGBoost-Champion%20F1%3D0.85-orange)](https://xgboost.readthedocs.io)
-[![SHAP](https://img.shields.io/badge/Explainability-SHAP-purple)](https://shap.readthedocs.io)
-[![Status](https://img.shields.io/badge/Status-Under%20Review-yellow)]()
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/guptasiddharth2409/yife-startup-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/guptasiddharth2409/yife-startup-prediction/actions)
+[![Paper](https://img.shields.io/badge/Paper-PTESM%202026-red.svg)](#citation)
+[![XGBoost](https://img.shields.io/badge/Champion-XGBoost%20F1%3D0.85-brightgreen.svg)](#results)
 
-> **Paper:** *Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach*  
-> **Author:** Siddharth Gupta · Greater Noida Institute of Technology · [guptasiddharth0767@gmail.com](mailto:guptasiddharth0767@gmail.com)  
-> **Status:** Under peer review
-
----
-
-## Overview
-
-This repository contains the complete, reproducible pipeline for the YIFE (**YC-Inspired Feature Engineering**) framework — a machine learning system for predicting early-stage startup success using domain-specific signals drawn from Y Combinator's portfolio.
-
-Most existing ML approaches use generic Crunchbase/PitchBook features and miss critical accelerator-specific signals. **YIFE** incorporates:
-- Batch cohort timing (encodes market cycle conditions)
-- Founder technical depth (proxied via GitHub activity)
-- Team composition dynamics
-- Industry category & AI integration flags
-- Geographic clustering
+> **"Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"**  
+> Siddharth Gupta · Pratham Namdev · Shubham Nagar · Sunny Kumar · Anjali Deshwal (Faculty Guide)  
+> Department of Computer Science & Engineering, Greater Noida Institute of Technology  
+> *Presented at PTESM 2026, April 10–11, 2026*
 
 ---
 
-## Results
+## 🔍 Overview
+
+Early-stage startup success is notoriously difficult to predict. Most ML approaches rely on generic Crunchbase features and miss domain-specific signals unique to elite accelerator programs. This repository introduces the **YIFE (YC-Inspired Feature Engineering)** framework — a novel set of 14 features across 6 categories that captures batch cohort timing, founder technical depth (via GitHub activity), team composition, industry category, and geographic cluster.
+
+We evaluate five classifiers on a curated dataset of **4,323 YC-funded companies (2005–2024)**.
+
+### 🏆 Key Results
 
 | Model | Accuracy | Precision | Recall | F1-Score | AUROC |
 |---|---|---|---|---|---|
 | Logistic Regression (B1 Baseline) | 0.71 | 0.68 | 0.64 | 0.66 | 0.74 |
-| Logistic Regression (YIFE) | 0.75 | 0.73 | 0.70 | 0.71 | 0.79 |
 | Random Forest (B2 Baseline) | 0.80 | 0.79 | 0.76 | 0.77 | 0.85 |
 | Random Forest (YIFE) | 0.83 | 0.82 | 0.79 | 0.80 | 0.88 |
-| **XGBoost (YIFE) ★** | **0.86** | **0.85** | **0.85** | **0.85** | **0.91** |
 | SVM (YIFE) | 0.79 | 0.78 | 0.74 | 0.76 | 0.83 |
 | MLP Neural Network (YIFE) | 0.81 | 0.80 | 0.78 | 0.79 | 0.86 |
+| **XGBoost (YIFE) ★** | **0.86** | **0.85** | **0.85** | **0.85** | **0.91** |
 
-★ Best Model · Evaluated on held-out temporal test set (W21–S24 batches, n=863)
+★ Champion model. McNemar's test confirms XGBoost significantly outperforms all baselines (vs. MLP: χ²=33.28, p<0.0001; vs. RF: χ²=12.50, p=0.0004).
 
----
+### 📊 SHAP Top Features (XGBoost)
 
-## YIFE Feature Set (14 Features)
-
-| Category | Feature | Description |
-|---|---|---|
-| Funding | `total_funding_usd` | Total capital raised |
-| Funding | `num_funding_rounds` | Count of funding events |
-| Funding | `seed_round_size` | Seed round amount |
-| Team | `team_size` | Co-founder count |
-| Team | `faang_experience` | Prior FAANG employment (binary) |
-| Team | `elite_edu` | Top-20 university attendance (binary) |
-| Tech Depth | `github_repo_count` | Total public repos of founding team |
-| Tech Depth | `github_commit_freq` | Avg weekly commits (6 mo pre-YC) |
-| Batch Context | `batch_year_encoded` | Batch year (encodes market cycles) |
-| Batch Context | `batch_size` | Companies in same cohort |
-| Industry | `industry_category` | YC-assigned category (B2B, AI, etc.) |
-| Industry | `ai_flag` | AI as core product component (binary) |
-| Geography | `geo_cluster` | Location cluster (SF Bay, NY, etc.) |
-| Network | `tier1_vc_investor` | Backed by Tier-1 VC post-YC (binary) |
-
----
-
-## Top SHAP Findings
-
-| Rank | Feature | Mean \|SHAP\| | Effect |
+| Rank | Feature | Mean \|SHAP\| | Direction |
 |---|---|---|---|
-| 1 | `num_funding_rounds` | 0.187 | Higher rounds → higher success |
-| 2 | `batch_year_encoded` | 0.163 | Recent batches (AI era 2020+) → positive |
-| 3 | `team_size` | 0.141 | 2–4 co-founders = optimal |
-| 4 | `total_funding_usd` | 0.128 | Higher funding → positive (diminishing) |
-| 5 | `ai_flag` | 0.112 | AI-core products strongly positive post-2020 |
-| 10 | `faang_experience` | 0.031 | **Near-zero effect** — challenges VC heuristic |
+| 1 | num_funding_rounds | 0.187 | Higher rounds → Higher success |
+| 2 | batch_year_encoded | 0.163 | Recent batches (AI era 2020+) → Higher success |
+| 3 | team_size | 0.141 | 2–4 co-founders → Optimal range |
+| 4 | total_funding_usd | 0.128 | Higher funding → Higher success |
+| 5 | ai_flag | 0.112 | AI-core products → Strongly positive post-2020 |
+| 10 | faang_experience | 0.031 | Near-zero — not a reliable predictor |
 
 ---
 
-## Quick Start
-
-```bash
-# 1. Clone & install
-git clone https://github.com/guptasiddharth2409/yife-startup-prediction.git
-cd yife-startup-prediction
-pip install -r requirements.txt
-
-# 2. Generate synthetic dataset (matches paper distributions)
-python scripts/01_generate_synthetic_data.py
-
-# 3. Train all 5 models
-python scripts/02_train_model.py
-
-# 4. Generate figures (ROC curves + SHAP)
-python scripts/03_generate_figures.py
-
-# 5. (Optional) Run Streamlit prediction UI
-streamlit run app/streamlit_app.py
-```
-
----
-
-## Project Structure
+## 📁 Repository Structure
 
 ```
 yife-startup-prediction/
-├── scripts/
-│   ├── 01_generate_synthetic_data.py   # Synthetic dataset matching paper distributions
-│   ├── 02_train_model.py               # Train all 5 classifiers + save models
-│   └── 03_generate_figures.py          # ROC curves + SHAP importance plots
-├── src/
-│   ├── config.py                       # Paths & constants
-│   ├── data/
-│   │   ├── collect_kaggle.py           # Load YC company directory
-│   │   ├── collect_crunchbase.py       # Load Crunchbase funding data
-│   │   └── collect_github.py          # Fetch founder GitHub activity
-│   ├── features/
-│   │   └── build_features.py          # YIFE 14-feature engineering pipeline
-│   ├── models/
-│   │   └── trainer.py                 # Model training & evaluation
-│   └── visualization/
-│       ├── roc_curves.py              # Figure 1: ROC curves
-│       └── shap_analysis.py           # Figure 2: SHAP global importance
-├── app/
-│   └── streamlit_app.py               # Interactive prediction dashboard
-├── notebooks/
-│   └── YIFE_full_pipeline.ipynb       # End-to-end Jupyter notebook
-├── data/
-│   ├── raw/                           # Place Kaggle/Crunchbase CSVs here
-│   └── processed/                     # Auto-generated processed features
-├── models/                            # Saved model artifacts (.pkl)
-├── figures/                           # Generated plots (ROC, SHAP)
-├── paper/                             # Paper PDF and supplementary materials
+├── README.md
 ├── requirements.txt
-└── README.md
+├── LICENSE
+├── .github/
+│   └── workflows/
+│       └── ci.yml                      # GitHub Actions CI
+├── src/
+│   ├── config.py                       # Path config & directory setup
+│   ├── data/
+│   │   ├── collect_kaggle.py           # Load YC company CSV from Kaggle
+│   │   ├── collect_crunchbase.py       # Load Crunchbase export
+│   │   ├── collect_github.py           # Fetch founder GitHub metrics
+│   │   └── generate_synthetic.py      # Synthetic dataset generator (reproducibility)
+│   ├── preprocess/
+│   │   └── prepare_features.py        # YIFE 14-feature construction + preprocessing
+│   ├── train/
+│   │   └── trainer.py                 # Train 5 classifiers, save models & metrics
+│   └── visualization/
+│       └── roc_shap.py                # ROC curves + SHAP importance plots
+├── notebooks/
+│   └── 03_model_training_evaluation.ipynb
+├── data/
+│   ├── raw/                           # Place raw CSVs here (see Data Setup)
+│   └── processed/                     # Generated by pipeline
+├── models/                            # Saved model .pkl files
+├── figures/                           # roc_curves.png, shap_importance.png
+└── logs/                              # metrics_test.json, prediction files
 ```
 
 ---
 
-## Dataset
+## ⚡ Quickstart
 
-- **4,323 YC-funded companies** spanning Winter 2005 – Summer 2024
-- **Success label**: raised Series A+, acquired, or remained active 3+ years post-batch
-- **~45% success rate** (consistent with published YC Series A statistics)
-- **Temporal split**: Training = W05–S20 (~3,460 companies), Test = W21–S24 (~863 companies)
+### 1. Install Dependencies
 
-> **Note on data:** Due to Crunchbase API terms of service, this repository ships with a high-fidelity synthetic dataset generated by `scripts/01_generate_synthetic_data.py`. The generator preserves the paper's feature distributions, temporal drift, and feature-target correlations. Real data can be substituted by placing `yc_companies.csv` and `crunchbase_yc.csv` into `data/raw/` and running `src/features/build_features.py`.
+```bash
+git clone https://github.com/guptasiddharth2409/yife-startup-prediction.git
+cd yife-startup-prediction
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Generate Synthetic Dataset (for Reproducibility)
+
+To comply with Crunchbase API terms regarding redistribution of private company data, we provide a synthetic data generator that preserves all statistical distributions, temporal drift, and feature-target correlations reported in the paper.
+
+```bash
+python src/data/generate_synthetic.py
+```
+
+This writes `data/processed/yife_features.parquet` (n=4,323, success_rate≈45%).
+
+### 3. Train All Models
+
+```bash
+python src/train/trainer.py
+```
+
+Outputs: `models/*.pkl`, `logs/metrics_test.json`, `logs/preds_*.parquet`
+
+### 4. Generate Publication Figures
+
+```bash
+python src/visualization/roc_shap.py
+```
+
+Outputs: `figures/roc_curves.png` (300 DPI), `figures/shap_importance.png` (300 DPI)
 
 ---
 
-## Reproducibility
+## 🗃️ Data Sources
 
-All experiments use `random_state=42`. The temporal train/test split prevents any look-ahead bias. Five-fold stratified cross-validation is performed on the training set only. McNemar's test confirms XGBoost significantly outperforms all baselines (vs. MLP: χ²=33.28, p<0.0001).
+| Source | Records | Features Used | Access |
+|---|---|---|---|
+| YC Company Directory (Kaggle) | 5,000+ companies (2005–2024) | Batch, category, status, team size, location | Public (Kaggle) |
+| Crunchbase Open Data Map | Subset of YC companies | Funding rounds, total raised, lead investors | Free tier / academic |
+| GitHub Public API | ~3,069 founder profiles (71% coverage) | Public repos, commit frequency, language diversity | REST API (public) |
+| LinkedIn (Manual Sample) | 500 founder profiles | Education, prior employer, co-founder count | Public profiles |
+
+**Note:** Place real data CSVs in `data/raw/` before running `src/preprocess/prepare_features.py`. The synthetic generator (`src/data/generate_synthetic.py`) can be used without any raw data for full pipeline reproducibility.
 
 ---
 
-## Citation
+## 🧪 YIFE Feature Set (14 Features, 6 Categories)
 
-If you use this code or build on this work, please cite:
+| Category | Feature | Type | Description |
+|---|---|---|---|
+| Funding | total_funding_usd | Continuous | Total capital raised across all rounds |
+| Funding | num_funding_rounds | Integer | Count of distinct funding events |
+| Funding | seed_round_size | Continuous | Amount raised in seed round (USD) |
+| Team | team_size | Integer | Number of co-founders at application |
+| Team | faang_experience | Binary | Any founder had prior FAANG role |
+| Team | elite_edu | Binary | Any founder attended Top-20 university |
+| Technical Depth | github_repo_count | Integer | Total public repos of founding team |
+| Technical Depth | github_commit_freq | Continuous | Avg. weekly commits (6 months pre-YC) |
+| Batch Context | batch_year_encoded | Ordinal | Encoded batch year (captures market cycles) |
+| Batch Context | batch_size | Integer | Number of companies in same batch |
+| Industry | industry_category | Categorical | YC-assigned category (B2B, AI, FinTech, etc.) |
+| Industry | ai_flag | Binary | Company uses AI as core product component |
+| Geography | geo_cluster | Categorical | Encoded location (SF Bay, NY, International) |
+| Network | tier1_vc_investor | Binary | Backed by Tier-1 VC post-YC |
+
+---
+
+## 📐 Experimental Setup
+
+- **Train/Test Split:** Temporal split — W05–S20 (n≈3,460, ~80%) train; W21–S24 (n≈863, ~20%) test
+- **Cross-validation:** 5-fold stratified CV on training set
+- **Class imbalance:** Handled via `class_weight='balanced'` across all models
+- **Evaluation metrics:** F1-Score and AUROC (primary); Accuracy, Precision, Recall (secondary)
+- **Hyperparameter tuning:** 3-fold CV grid search on training set only (no leakage)
+- **Interpretability:** SHAP TreeExplainer on XGBoost champion model
+
+---
+
+## 📊 Batch Era Analysis
+
+| Era | Batch Range | Companies | Success Rate | Dominant Category |
+|---|---|---|---|---|
+| Early YC | W05–S12 | ~420 | 38% | Consumer / Web |
+| Growth Era | W13–S19 | ~1,640 | 42% | B2B SaaS / Mobile |
+| AI Era | W20–S24 | ~2,263 | 51% | AI / B2B / FinTech |
+
+---
+
+## 📦 Environment
+
+Python 3.10+ · scikit-learn 1.4 · XGBoost 2.0 · SHAP 0.44 · PyTorch 2.2
+
+See `requirements.txt` for the full pinned dependency list.
+
+---
+
+## 📜 Citation
+
+If you use this code or dataset in your research, please cite:
 
 ```bibtex
-@article{gupta2025yife,
-  title   = {Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach},
-  author  = {Gupta, Siddharth},
-  journal = {Under Review},
-  year    = {2025},
-  url     = {https://github.com/guptasiddharth2409/yife-startup-prediction}
+@inproceedings{gupta2026yife,
+  title     = {Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach},
+  author    = {Gupta, Siddharth and Namdev, Pratham and Nagar, Shubham and Kumar, Sunny and Deshwal, Anjali},
+  booktitle = {Proceedings of the International Conference on Progressive Trends in Engineering Science and Management (PTESM 2026)},
+  year      = {2026},
+  month     = {April},
+  address   = {Greater Noida, India}
 }
 ```
 
 ---
 
-## Key References
+## 📄 License
 
-1. Li et al. (2025). *Founder Backgrounds and Startup Funding: Evidence from Y Combinator.* arXiv:2512.13755.
-2. Razaghzadeh Bidgoli et al. (2024). *Predicting the success of startups using a ML approach.* J. Innovation & Entrepreneurship.
-3. Park et al. (2024). *Predicting startup success using two bias-free machine learning.* J. Big Data, 11, 122.
-4. Maarouf et al. (2025). *A fused large language model for predicting startup success.* EJOR, 322(1).
-5. Lundberg & Lee (2017). *A unified approach to interpreting model predictions.* NeurIPS 30.
+MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## License
+## 🙏 Acknowledgements
 
-MIT License — see [LICENSE](LICENSE) for details.
+The authors thank the Department of Computer Science & Engineering at Greater Noida Institute of Technology (GNIT) for institutional support. We are grateful to the open-source community for scikit-learn, XGBoost, SHAP, and PyTorch. The YC company dataset was sourced from publicly available records via Kaggle and the YC company directory.
