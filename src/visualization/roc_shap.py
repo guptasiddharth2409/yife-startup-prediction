@@ -4,11 +4,13 @@ Generates two publication-quality figures (300 DPI):
   figures/roc_curves.png       - Figure 1 of the paper
   figures/shap_importance.png  - Figure 2 of the paper
 
-Requires:
-  - logs/preds_*.parquet        (output of trainer.py)
-  - models/xgb.pkl              (saved XGBoost model)
-  - data/processed/yife_features.parquet
+Usage:
+    python src/visualization/roc_shap.py
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -58,15 +60,17 @@ def plot_roc_curves():
         color = MODEL_COLORS.get(name, "#374151")
         label = MODEL_LABELS.get(name, name.capitalize())
         ax.plot(fpr, tpr, color=color,
-                lw=2.8 if name=="xgb" else 1.8,
-                ls="-" if name=="xgb" else "--",
+                lw=2.8 if name == "xgb" else 1.8,
+                ls="-" if name == "xgb" else "--",
                 label=f"{label} (AUC = {auc_val:.3f})")
 
-    ax.plot([0,1],[0,1], "k:", lw=1.2, label="Random Chance")
-    ax.set_xlim(0,1); ax.set_ylim(0,1.02)
+    ax.plot([0, 1], [0, 1], "k:", lw=1.2, label="Random Chance")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1.02)
     ax.set_xlabel("False Positive Rate", fontsize=10)
     ax.set_ylabel("True Positive Rate", fontsize=10)
-    ax.set_title("ROC Curves — Held-Out YC Test Set (W21–S24)", fontsize=11, fontweight="bold")
+    ax.set_title("ROC Curves \u2014 Held-Out YC Test Set (W21\u2013S24)",
+                 fontsize=11, fontweight="bold")
     ax.legend(fontsize=8, loc="lower right", framealpha=0.9)
     plt.tight_layout()
     out = FIG_DIR / "roc_curves.png"
@@ -77,24 +81,33 @@ def plot_roc_curves():
 
 def plot_shap_importance():
     try:
-        import shap, joblib
+        import shap
+        import joblib
     except ImportError:
-        print("shap/joblib not installed.")
+        print("shap/joblib not installed. Skipping SHAP plot.")
         return
+
     xgb_path = MODEL_DIR / "xgb.pkl"
     if not xgb_path.exists():
         print("XGBoost model not found. Run trainer.py first.")
         return
+
     df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet")
-    skip = {"company","success","batch"}
+    skip   = {"company", "success", "batch"}
     X_cols = [c for c in df.columns if c not in skip]
-    X = df[X_cols].astype(float).values
+    X = df[X_cols].astype(float).fillna(0).values
+
     model     = joblib.load(xgb_path)
     explainer = shap.TreeExplainer(model)
     shap_vals = explainer.shap_values(X)
     mean_abs  = np.abs(shap_vals).mean(axis=0)
-    feat_df   = (pd.DataFrame({"feature":X_cols,"mean_abs_shap":mean_abs})
-                   .sort_values("mean_abs_shap",ascending=False).head(10).reset_index(drop=True))
+
+    feat_df = (
+        pd.DataFrame({"feature": X_cols, "mean_abs_shap": mean_abs})
+        .sort_values("mean_abs_shap", ascending=False)
+        .head(10)
+        .reset_index(drop=True)
+    )
 
     def _color(v):
         if v >= 0.12: return "#1d4ed8"
@@ -108,11 +121,13 @@ def plot_shap_importance():
 
     fig, ax = plt.subplots(figsize=(5.8, 4.2), dpi=300)
     ax.barh(y_pos, values, color=colors, height=0.65, edgecolor="white")
-    ax.set_yticks(y_pos); ax.set_yticklabels(labels, fontsize=9)
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(labels, fontsize=9)
     ax.set_xlabel("Mean |SHAP| Value", fontsize=10)
-    ax.set_title("SHAP Global Feature Importance — XGBoost (YIFE)", fontsize=11, fontweight="bold")
-    for i,v in enumerate(values):
-        ax.text(v+0.003, i, f"{v:.3f}", va="center", fontsize=8)
+    ax.set_title("SHAP Global Feature Importance \u2014 XGBoost (YIFE)",
+                 fontsize=11, fontweight="bold")
+    for i, v in enumerate(values):
+        ax.text(v + 0.003, i, f"{v:.3f}", va="center", fontsize=8)
     ax.set_axisbelow(True)
     ax.xaxis.grid(True, color="#e5e7eb", linewidth=0.7)
     plt.tight_layout()

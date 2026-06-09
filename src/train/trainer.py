@@ -5,7 +5,14 @@ trains five classifiers, and writes:
   models/<name>.pkl          : serialized model artifacts
   logs/metrics_test.json     : per-model evaluation metrics
   logs/preds_<name>.parquet  : predictions used by roc_shap.py
+
+Usage:
+    python src/train/trainer.py
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import json
 import joblib
 import numpy as np
@@ -27,8 +34,10 @@ def load_data():
 
     def _year(b):
         try:
-            yy = int(str(b)[1:]) if isinstance(b, str) else int(b)
-            return 2000 + yy if yy <= 30 else (1900 + yy if yy < 100 else yy)
+            if isinstance(b, str) and len(b) >= 3:
+                yy = int(b[1:])
+                return 2000 + yy if yy <= 30 else 1900 + yy
+            return int(b) if int(b) > 100 else 2000 + int(b)
         except Exception:
             return 2010
 
@@ -40,9 +49,9 @@ def load_data():
     skip   = {"company", "success", "batch", "_by"}
     X_cols = [c for c in df.columns if c not in skip]
 
-    X_train = train[X_cols].astype(float).values
+    X_train = train[X_cols].astype(float).fillna(0).values
     y_train = train["success"].values
-    X_test  = test[X_cols].astype(float).values
+    X_test  = test[X_cols].astype(float).fillna(0).values
     y_test  = test["success"].values
 
     print(f"Train: {X_train.shape}  |  Test: {X_test.shape}  |  Test success rate: {y_test.mean():.3f}")
@@ -53,16 +62,23 @@ def fit_and_eval():
     X_train, y_train, X_test, y_test, feature_names = load_data()
 
     models = {
-        "logistic":      LogisticRegression(C=1.0, max_iter=1000, class_weight="balanced", random_state=42),
-        "random_forest": RandomForestClassifier(n_estimators=200, max_depth=15,
-                             class_weight="balanced", n_jobs=-1, random_state=42),
-        "xgb":           XGBClassifier(n_estimators=300, learning_rate=0.05,
-                             eval_metric="logloss", n_jobs=-1, random_state=42),
-        "svm":           SVC(kernel="rbf", C=10, gamma="scale",
-                             class_weight="balanced", probability=True, random_state=42),
-        "mlp":           MLPClassifier(hidden_layer_sizes=(128,64,32),
-                             learning_rate_init=0.001, max_iter=300,
-                             early_stopping=True, random_state=42),
+        "logistic":      LogisticRegression(
+                            C=1.0, max_iter=1000,
+                            class_weight="balanced", random_state=42),
+        "random_forest": RandomForestClassifier(
+                            n_estimators=200, max_depth=15,
+                            class_weight="balanced", n_jobs=-1, random_state=42),
+        "xgb":           XGBClassifier(
+                            n_estimators=300, learning_rate=0.05,
+                            eval_metric="logloss", n_jobs=-1, random_state=42,
+                            verbosity=0),
+        "svm":           SVC(
+                            kernel="rbf", C=10, gamma="scale",
+                            class_weight="balanced", probability=True, random_state=42),
+        "mlp":           MLPClassifier(
+                            hidden_layer_sizes=(128, 64, 32),
+                            learning_rate_init=0.001, max_iter=300,
+                            early_stopping=True, random_state=42),
     }
 
     results = {}
@@ -73,17 +89,19 @@ def fit_and_eval():
         joblib.dump(model, MODEL_DIR / f"{name}.pkl")
 
         y_pred = model.predict(X_test)
-        y_prob = (model.predict_proba(X_test)[:, 1]
-                  if hasattr(model, "predict_proba")
-                  else model.decision_function(X_test))
+        y_prob = (
+            model.predict_proba(X_test)[:, 1]
+            if hasattr(model, "predict_proba")
+            else model.decision_function(X_test)
+        )
 
         cm = confusion_matrix(y_test, y_pred)
         metrics = {
-            "accuracy":        float(accuracy_score(y_test, y_pred)),
-            "precision":       float(precision_score(y_test, y_pred, zero_division=0)),
-            "recall":          float(recall_score(y_test, y_pred, zero_division=0)),
-            "f1":              float(f1_score(y_test, y_pred, zero_division=0)),
-            "auroc":           float(roc_auc_score(y_test, y_prob)),
+            "accuracy":         float(accuracy_score(y_test, y_pred)),
+            "precision":        float(precision_score(y_test, y_pred, zero_division=0)),
+            "recall":           float(recall_score(y_test, y_pred, zero_division=0)),
+            "f1":               float(f1_score(y_test, y_pred, zero_division=0)),
+            "auroc":            float(roc_auc_score(y_test, y_prob)),
             "confusion_matrix": cm.tolist(),
         }
         results[name] = metrics
@@ -94,6 +112,7 @@ def fit_and_eval():
 
     with open(LOG_DIR / "metrics_test.json", "w") as f:
         json.dump(results, f, indent=2)
+    print(f"\nMetrics saved to {LOG_DIR / 'metrics_test.json'}")
 
     print("\n" + "="*70)
     print(f"{'Model':<20} {'Accuracy':>9} {'Precision':>10} {'Recall':>8} {'F1':>7} {'AUROC':>7}")

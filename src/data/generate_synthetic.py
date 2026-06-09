@@ -8,12 +8,18 @@ and feature-target correlations reported in:
 
 Outputs: data/processed/yife_features.parquet
   - n = 4,323 companies (W05-S24)
-  - success rate ~45% (consistent with YC Series A rate)
+  - success rate ~45%
   - SHAP-ranked feature importances match Table 6 of the paper
 
-This generator exists to allow full pipeline reproducibility without
-requiring proprietary Crunchbase API keys.
+Usage:
+    python src/data/generate_synthetic.py
 """
+import sys
+from pathlib import Path
+
+# Ensure repo root is on sys.path when run as a script
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import numpy as np
 import pandas as pd
 from src.config import PROCESSED_DIR
@@ -40,11 +46,11 @@ def generate():
     total_funding_usd  = rng.lognormal(12.0, 1.2, size=N) * (1 + num_funding_rounds * 0.4)
     seed_round_size    = np.where(num_funding_rounds > 0, rng.lognormal(6.5, 1.0, size=N), 0.0)
 
-    team_size        = rng.choice([1,2,3,4,5], size=N, p=[0.15,0.45,0.20,0.12,0.08])
+    team_size        = rng.choice([1, 2, 3, 4, 5], size=N, p=[0.15, 0.45, 0.20, 0.12, 0.08])
     faang_experience = rng.binomial(1, 0.18, size=N)
     elite_edu        = rng.binomial(1, 0.22, size=N)
 
-    github_coverage    = rng.choice([1,0], size=N, p=[0.71,0.29])
+    github_coverage    = rng.choice([1, 0], size=N, p=[0.71, 0.29])
     github_repo_count  = (rng.poisson(5, size=N) * github_coverage).astype(float)
     github_commit_freq = np.clip(
         github_repo_count * rng.uniform(0.2, 1.5, size=N) + rng.normal(0, 0.5, size=N),
@@ -53,14 +59,14 @@ def generate():
     github_repo_count[github_repo_count == 0]   = np.nan
     github_commit_freq[github_commit_freq == 0] = np.nan
 
-    industry_choices = ['B2B','AI','FinTech','Consumer','Healthcare','DevTools','Other']
-    industry = rng.choice(industry_choices, size=N, p=[0.30,0.18,0.08,0.12,0.06,0.10,0.16])
+    industry_choices = ['B2B', 'AI', 'FinTech', 'Consumer', 'Healthcare', 'DevTools', 'Other']
+    industry = rng.choice(industry_choices, size=N, p=[0.30, 0.18, 0.08, 0.12, 0.06, 0.10, 0.16])
     ai_prob  = np.where((batch_year_encoded >= 2020) & (industry == 'AI'), 0.90,
                np.where(batch_year_encoded >= 2020, 0.40, 0.10))
     ai_flag  = rng.binomial(1, ai_prob)
 
-    geo_cluster = rng.choice(['SF Bay','NY','International','Other'], size=N,
-                             p=[0.45,0.15,0.25,0.15])
+    geo_cluster       = rng.choice(['SF Bay', 'NY', 'International', 'Other'], size=N,
+                                   p=[0.45, 0.15, 0.25, 0.15])
     tier1_vc_investor = rng.binomial(1, 0.12, size=N)
 
     batch_norm  = (batch_year_encoded - 2005) / (2024 - 2005)
@@ -107,7 +113,8 @@ def generate():
     out_path = PROCESSED_DIR / "yife_features.parquet"
     df.to_parquet(out_path, index=False)
     print(f"Synthetic dataset written to {out_path}")
-    print(f"  n={len(df):,}  |  success_rate={df['success'].mean():.3f}")
+    print(f"  n={len(df):,}  |  success_rate={df['success'].mean():.3f}  "
+          f"|  ai_flag_rate={df['ai_flag'].mean():.3f}")
     return df
 
 
