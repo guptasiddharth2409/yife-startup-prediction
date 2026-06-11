@@ -87,7 +87,6 @@ def plot_shap_importance():
 
     df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet")
 
-    # Encode categoricals same as trainer
     for col in df.select_dtypes(include=["object", "string", "category"]).columns:
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col].astype(str))
@@ -96,8 +95,18 @@ def plot_shap_importance():
     X_cols = [c for c in df.columns if c not in skip]
     X = df[X_cols].astype(float).fillna(0).values
 
-    model     = joblib.load(xgb_path)
-    explainer = shap.TreeExplainer(model)
+    model = joblib.load(xgb_path)
+
+    # XGBoost 2.x + SHAP compatibility fix:
+    # shap.TreeExplainer(XGBClassifier) raises ValueError on base_score format.
+    # Passing the underlying Booster object bypasses this issue.
+    try:
+        booster = model.get_booster()
+        explainer = shap.TreeExplainer(booster)
+    except Exception as e:
+        print(f"SHAP explainer failed: {e}. Skipping SHAP plot.")
+        return
+
     shap_vals = explainer.shap_values(X)
     mean_abs  = np.abs(shap_vals).mean(axis=0)
 
