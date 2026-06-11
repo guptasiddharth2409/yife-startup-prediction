@@ -1,12 +1,4 @@
-"""YIFE Visualization: ROC Curves + SHAP Feature Importance
-
-Generates two publication-quality figures (300 DPI):
-  figures/roc_curves.png       - Figure 1 of the paper
-  figures/shap_importance.png  - Figure 2 of the paper
-
-Usage:
-    python src/visualization/roc_shap.py
-"""
+"""YIFE Visualization: ROC Curves + SHAP Feature Importance"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -16,6 +8,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 from src.config import FIG_DIR, LOG_DIR, MODEL_DIR, PROCESSED_DIR
 
 FIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -40,7 +33,7 @@ def plot_roc_curves():
     from sklearn.metrics import roc_curve, auc
     pred_files = sorted(LOG_DIR.glob("preds_*.parquet"))
     if not pred_files:
-        print("No prediction files found in logs/. Run trainer.py first.")
+        print("No prediction files found. Run trainer.py first.")
         return
 
     fig, ax = plt.subplots(figsize=(5.8, 4.8), dpi=300)
@@ -76,7 +69,7 @@ def plot_roc_curves():
     out = FIG_DIR / "roc_curves.png"
     plt.savefig(out, dpi=300, bbox_inches="tight")
     plt.close()
-    print(f"Saved ROC figure -> {out}")
+    print(f"Saved -> {out}")
 
 
 def plot_shap_importance():
@@ -93,6 +86,12 @@ def plot_shap_importance():
         return
 
     df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet")
+
+    # Encode categoricals same as trainer
+    for col in df.select_dtypes(include=["object", "string", "category"]).columns:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col].astype(str))
+
     skip   = {"company", "success", "batch"}
     X_cols = [c for c in df.columns if c not in skip]
     X = df[X_cols].astype(float).fillna(0).values
@@ -134,7 +133,7 @@ def plot_shap_importance():
     out = FIG_DIR / "shap_importance.png"
     plt.savefig(out, dpi=300, bbox_inches="tight")
     plt.close()
-    print(f"Saved SHAP figure -> {out}")
+    print(f"Saved -> {out}")
 
 
 if __name__ == "__main__":

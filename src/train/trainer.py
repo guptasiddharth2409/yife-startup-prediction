@@ -1,14 +1,4 @@
-"""YIFE Model Training Pipeline
-
-Applies a strict temporal train-test split (W05-S20 train | W21-S24 test),
-trains five classifiers, and writes:
-  models/<name>.pkl          : serialized model artifacts
-  logs/metrics_test.json     : per-model evaluation metrics
-  logs/preds_<name>.parquet  : predictions used by roc_shap.py
-
-Usage:
-    python src/train/trainer.py
-"""
+"""YIFE Model Training Pipeline"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -17,6 +7,7 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
@@ -29,19 +20,32 @@ from sklearn.metrics import (
 from src.config import PROCESSED_DIR, MODEL_DIR, LOG_DIR
 
 
+def encode_categoricals(df: pd.DataFrame) -> pd.DataFrame:
+    """Label-encode all object/string columns in-place."""
+    df = df.copy()
+    for col in df.select_dtypes(include=["object", "string", "category"]).columns:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col].astype(str))
+    return df
+
+
 def load_data():
     df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet")
 
+    # Encode categoricals BEFORE numeric conversion
+    df = encode_categoricals(df)
+
     def _year(b):
         try:
-            if isinstance(b, str) and len(b) >= 3:
-                yy = int(b[1:])
-                return 2000 + yy if yy <= 30 else 1900 + yy
             return int(b) if int(b) > 100 else 2000 + int(b)
         except Exception:
             return 2010
 
-    df["_by"] = df["batch"].apply(_year) if "batch" in df.columns else df["batch_year_encoded"].astype(int)
+    # batch_year_encoded is already int after label encoding of batch
+    if "batch_year_encoded" in df.columns:
+        df["_by"] = df["batch_year_encoded"].astype(int)
+    else:
+        df["_by"] = df["batch"].apply(_year)
 
     train = df[df["_by"] < 2021]
     test  = df[df["_by"] >= 2021]
@@ -54,7 +58,8 @@ def load_data():
     X_test  = test[X_cols].astype(float).fillna(0).values
     y_test  = test["success"].values
 
-    print(f"Train: {X_train.shape}  |  Test: {X_test.shape}  |  Test success rate: {y_test.mean():.3f}")
+    print(f"Train: {X_train.shape}  |  Test: {X_test.shape}  |  "
+          f"Test success rate: {y_test.mean():.3f}")
     return X_train, y_train, X_test, y_test, X_cols
 
 
@@ -74,7 +79,8 @@ def fit_and_eval():
                             verbosity=0),
         "svm":           SVC(
                             kernel="rbf", C=10, gamma="scale",
-                            class_weight="balanced", probability=True, random_state=42),
+                            class_weight="balanced", probability=True,
+                            random_state=42),
         "mlp":           MLPClassifier(
                             hidden_layer_sizes=(128, 64, 32),
                             learning_rate_init=0.001, max_iter=300,
@@ -82,7 +88,6 @@ def fit_and_eval():
     }
 
     results = {}
-
     for name, model in models.items():
         print(f"\nTraining {name} ...", flush=True)
         model.fit(X_train, y_train)
@@ -112,10 +117,11 @@ def fit_and_eval():
 
     with open(LOG_DIR / "metrics_test.json", "w") as f:
         json.dump(results, f, indent=2)
-    print(f"\nMetrics saved to {LOG_DIR / 'metrics_test.json'}")
+    print(f"\nAll metrics saved -> {LOG_DIR / 'metrics_test.json'}")
 
     print("\n" + "="*70)
-    print(f"{'Model':<20} {'Accuracy':>9} {'Precision':>10} {'Recall':>8} {'F1':>7} {'AUROC':>7}")
+    print(f"{'Model':<20} {'Accuracy':>9} {'Precision':>10} "
+          f"{'Recall':>8} {'F1':>7} {'AUROC':>7}")
     print("-"*70)
     for name, m in results.items():
         print(f"{name:<20} {m['accuracy']:>9.4f} {m['precision']:>10.4f} "
