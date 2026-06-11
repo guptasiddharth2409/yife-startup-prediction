@@ -1,0 +1,14 @@
+# Optional heavy dependencies — NOT required for core pipeline or CI
+# Install manually if needed:
+#   pip install -r requirements-optional.txt
+
+# Deep learning (for MLP experiments)
+torch>=2.2.0   # 2GB+ download; CPU-only: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# API server
+fastapi>=0.109
+uvicorn>=0.27
+pydantic>=2.6
+
+# Interactive demo
+streamlit>=1.31
