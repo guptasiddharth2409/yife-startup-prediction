@@ -38,17 +38,17 @@ jobs:
       - name: Install package in editable mode
         run: pip install -e . --no-deps
 
-      - name: Step 1 - Generate synthetic dataset
+      - name: Generate synthetic dataset
         run: python src/data/generate_synthetic.py
 
-      - name: Step 2 - Train all models
+      - name: Train all models
         run: python src/train/trainer.py
 
-      - name: Step 3 - Generate figures
+      - name: Generate figures
         run: python src/visualization/roc_shap.py
 
-      - name: Step 4 - Run pytest
-        run: pytest tests/ -v
+      - name: Run pytest (9 tests)
+        run: pytest tests/ -v --tb=short
 
       - name: Upload figures as CI artifacts
         uses: actions/upload-artifact@v4
