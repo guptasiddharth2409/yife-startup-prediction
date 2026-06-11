@@ -1,8 +1,9 @@
+[![CI](https://github.com/guptasiddharth2409/yife-startup-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/guptasiddharth2409/yife-startup-prediction/actions)
+
 # YIFE: YC-Inspired Feature Engineering for Startup Success Prediction
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/guptasiddharth2409/yife-startup-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/guptasiddharth2409/yife-startup-prediction/actions)
 [![Paper](https://img.shields.io/badge/Paper-PTESM%202026-red.svg)](#citation)
 [![XGBoost](https://img.shields.io/badge/Champion-XGBoost%20F1%3D0.85-brightgreen.svg)](#results)
 
