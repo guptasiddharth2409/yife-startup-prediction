@@ -4,13 +4,14 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Paper](https://img.shields.io/badge/Paper-PTESM%202026-red.svg)](#citation)
+[![Published](https://img.shields.io/badge/Published-Cureus%20Journal%20of%20Computer%20Science-red.svg)](#citation)
 [![XGBoost](https://img.shields.io/badge/Champion-XGBoost%20F1%3D0.85-brightgreen.svg)](#results)
 
 > **"Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"**  
-> Siddharth Gupta · Pratham Namdev · Shubham Nagar · Sunny Kumar · Anjali Deshwal (Faculty Guide)  
+> Siddharth Gupta · Pratham Namdev · Shubham Nagar · Sunny Singh · Anjali Deshwal (Faculty Guide)  
 > Department of Computer Science & Engineering, Greater Noida Institute of Technology  
-> *Presented at PTESM 2026, April 10–11, 2026*
+> *Published in Cureus Journal of Computer Science (Part of Springer Nature)*  
+> *Previously presented at PTESM 2026, April 10–11, 2026*
 
 ---
 
@@ -189,13 +190,13 @@ See `requirements.txt` for the full pinned dependency list.
 If you use this code or dataset in your research, please cite:
 
 ```bibtex
-@inproceedings{gupta2026yife,
+@article{gupta2026yife,
   title     = {Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach},
-  author    = {Gupta, Siddharth and Namdev, Pratham and Nagar, Shubham and Kumar, Sunny and Deshwal, Anjali},
-  booktitle = {Proceedings of the International Conference on Progressive Trends in Engineering Science and Management (PTESM 2026)},
+  author    = {Gupta, Siddharth and Namdev, Pratham and Nagar, Shubham and Singh, Sunny and Deshwal, Anjali},
+  journal   = {Cureus Journal of Computer Science},
+  publisher = {Springer Nature},
   year      = {2026},
-  month     = {April},
-  address   = {Greater Noida, India}
+  note      = {Previously presented at PTESM 2026, April 10--11, 2026, Greater Noida, India}
 }
 ```
 
