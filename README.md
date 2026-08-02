@@ -7,7 +7,7 @@
 [![Published](https://img.shields.io/badge/Published-Cureus%20Journal%20of%20Computer%20Science-red.svg)](#citation)
 [![XGBoost](https://img.shields.io/badge/Champion-XGBoost%20F1%3D0.85-brightgreen.svg)](#results)
 
-> **"Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"**  
+> **"Predicting Startup Outcomes Using Explainable Machine Learning and YC-Inspired Feature Engineering"**  
 > Siddharth Gupta · Pratham Namdev · Shubham Nagar · Sunny Singh · Anjali Deshwal (Faculty Guide)  
 > Department of Computer Science & Engineering, Greater Noida Institute of Technology  
 > *Published in Cureus Journal of Computer Science (Part of Springer Nature)*  
