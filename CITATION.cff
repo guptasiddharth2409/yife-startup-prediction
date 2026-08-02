@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "YIFE: YC-Inspired Feature Engineering for Startup Success Prediction"
+title: "Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"
 message: "If you use this software or dataset, please cite it using the metadata below."
 type: software
 authors:
