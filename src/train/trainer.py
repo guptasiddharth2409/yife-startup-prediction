@@ -87,17 +87,20 @@ def load_data(path=None):
     return X_train, y_train, X_test, y_test, feature_cols
 
 
-def make_pipeline(model, scale_numeric=False):
-    transformers = [
-        ("num", Pipeline([
+def make_pipeline(model, scale_numeric=False, numeric_features=None, categorical_features=None):
+    numeric_features = numeric_features or NUMERIC
+    categorical_features = categorical_features or CATEGORICAL
+    transformers = []
+    if numeric_features:
+        transformers.append(("num", Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
-            *( [("scaler", StandardScaler())] if scale_numeric else [] ),
-        ]), NUMERIC),
-        ("cat", Pipeline([
+            *([("scaler", StandardScaler())] if scale_numeric else []),
+        ]), numeric_features))
+    if categorical_features:
+        transformers.append(("cat", Pipeline([
             ("imputer", SimpleImputer(strategy="most_frequent")),
             ("onehot", OneHotEncoder(handle_unknown="ignore")),
-        ]), CATEGORICAL),
-    ]
+        ]), categorical_features))
     preprocessor = ColumnTransformer(transformers, remainder="drop")
     return Pipeline([("preprocess", preprocessor), ("model", model)])
 
@@ -163,14 +166,14 @@ def main():
         best = search.best_estimator_
 
         cv_f1 = float(cross_val_score(best, X_train, y_train, scoring="f1", cv=selection_cv, n_jobs=-1).mean())
-        print(f"  best params: {search.best_params}")
+        print(f"  best params: {search.best_params_}")
         print(f"  5-fold training CV F1: {cv_f1:.4f}")
 
         best.fit(X_train, y_train)
         joblib.dump(best, MODEL_DIR / f"{name}.pkl")
         results[name] = evaluate(name, best, X_test, y_test)
         results[name]["training_cv_f1"] = round(cv_f1, 4)
-        results[name]["best_params"] = search.best_params
+        results[name]["best_params"] = search.best_params_
 
     with open(LOG_DIR / "metrics_test.json", "w") as f:
         json.dump(results, f, indent=2, default=str)
