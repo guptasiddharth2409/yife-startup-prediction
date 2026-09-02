@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: "Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"
-message: "If you use this software or dataset, please cite it using the metadata below."
+title: "Predicting Startup Outcomes Using Explainable Machine Learning and Y Combinator-Inspired Feature Engineering"
+message: "If you use this software or research materials, please cite the published article below."
 type: software
 authors:
   - family-names: Gupta
@@ -23,7 +23,7 @@ license: MIT
 year: 2026
 preferred-citation:
   type: article
-  title: "Predicting Early-Stage Startup Success Using ML: A YC-Inspired Feature Engineering Approach"
+  title: "Predicting Startup Outcomes Using Explainable Machine Learning and Y Combinator-Inspired Feature Engineering"
   authors:
     - family-names: Gupta
       given-names: Siddharth
@@ -36,5 +36,8 @@ preferred-citation:
     - family-names: Deshwal
       given-names: Anjali
   journal: "Cureus Journal of Computer Science"
-  publisher: "Springer Nature"
+  volume: "3"
+  publisher: "Cureus / Springer Nature"
   year: 2026
+  doi: "10.7759/s44389-026-00254-0"
+  url: "https://doi.org/10.7759/s44389-026-00254-0"
