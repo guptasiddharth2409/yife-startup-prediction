@@ -85,7 +85,6 @@ def plot_shap_importance():
 
     model_path = MODEL_DIR / "xgboost.pkl"
     if not model_path.exists():
-        # Backward-compatible artifact name.
         model_path = MODEL_DIR / "xgb.pkl"
     if not model_path.exists():
         print("XGBoost model not found. Run trainer.py first.")
@@ -96,17 +95,19 @@ def plot_shap_importance():
     X = df[[c for c in df.columns if c not in skip]]
     model = joblib.load(model_path)
 
-    # Current trainer saves a sklearn Pipeline with preprocessing + model.
     if hasattr(model, "named_steps"):
         preprocessor = model.named_steps["preprocess"]
         estimator = model.named_steps["model"]
         X_transformed = preprocessor.transform(X)
         feature_names = preprocessor.get_feature_names_out()
     else:
-        # Backward-compatible path for legacy bare XGBoost artifacts.
         estimator = model
         X_transformed = X.astype(float).fillna(0).values
         feature_names = np.asarray(X.columns)
+
+    # TreeExplainer is more reliable with a dense matrix for this small feature set.
+    if hasattr(X_transformed, "toarray"):
+        X_transformed = X_transformed.toarray()
 
     try:
         booster = estimator.get_booster()
