@@ -33,7 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install core dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -44,18 +44,13 @@ jobs:
       - name: Generate synthetic dataset
         run: python src/data/generate_synthetic.py
 
-      - name: Train all models
-        run: python src/train/trainer.py
-
-      - name: Generate figures
-        run: python src/visualization/roc_shap.py
-
-      - name: Run pytest (9 tests)
+      - name: Run tests
         run: pytest tests/ -v --tb=short
 
-      - name: Upload figures as CI artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: figures-py${{ matrix.python-version }}
-          path: figures/*.png
-          if-no-files-found: warn
+      - name: Compile Python sources
+        run: python -m compileall -q src scripts app
+
+# Full hyperparameter tuning is intentionally not run on every CI push because
+# it is substantially more expensive than a unit/smoke test suite. Run the
+# reference training pipeline locally or in a dedicated compute environment:
+#   python src/train/trainer.py
