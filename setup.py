@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="yife",
-    version="1.0.0",
-    description="YC-Inspired Feature Engineering for Startup Success Prediction",
+    version="1.1.0",
+    description="YC-Inspired Feature Engineering for Startup Outcome Classification",
     author="Siddharth Gupta",
     author_email="guptasiddharth2409@gmail.com",
     url="https://github.com/guptasiddharth2409/yife-startup-prediction",
