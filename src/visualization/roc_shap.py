@@ -1,70 +1,66 @@
-"""YIFE Visualization: ROC Curves + SHAP Feature Importance"""
+"""Generate ROC and SHAP figures from the current training pipeline.
+
+Figures are generated from the repository's current artifacts. When synthetic
+data are used, these figures are demonstrations and should not be presented as
+the published paper's original plots.
+"""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-import numpy as np
-import pandas as pd
+import joblib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
+import numpy as np
+import pandas as pd
+from sklearn.metrics import auc, roc_curve
+
 from src.config import FIG_DIR, LOG_DIR, MODEL_DIR, PROCESSED_DIR
 
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-MODEL_COLORS = {
-    "xgb":           "#2563eb",
-    "random_forest": "#16a34a",
-    "mlp":           "#7c3aed",
-    "svm":           "#ea580c",
-    "logistic":      "#6b7280",
-}
 MODEL_LABELS = {
-    "xgb":           "XGBoost",
+    "xgboost": "XGBoost",
     "random_forest": "Random Forest",
-    "mlp":           "MLP Neural Network",
-    "svm":           "SVM",
-    "logistic":      "Logistic Regression",
+    "mlp": "MLP Neural Network",
+    "svm": "SVM",
+    "logistic": "Logistic Regression",
+    "xgb": "XGBoost",
 }
 
 
 def plot_roc_curves():
-    from sklearn.metrics import roc_curve, auc
     pred_files = sorted(LOG_DIR.glob("preds_*.parquet"))
     if not pred_files:
         print("No prediction files found. Run trainer.py first.")
         return
 
     fig, ax = plt.subplots(figsize=(5.8, 4.8), dpi=300)
-    ax.set_axisbelow(True)
-    ax.yaxis.grid(True, color="#e5e7eb", linewidth=0.7)
-    ax.xaxis.grid(True, color="#e5e7eb", linewidth=0.7)
-
     records = []
     for p in pred_files:
         name = p.stem.replace("preds_", "")
-        df   = pd.read_parquet(p)
+        df = pd.read_parquet(p)
         fpr, tpr, _ = roc_curve(df["y_true"], df["y_prob"])
         records.append((auc(fpr, tpr), name, fpr, tpr))
     records.sort(key=lambda x: -x[0])
 
     for auc_val, name, fpr, tpr in records:
-        color = MODEL_COLORS.get(name, "#374151")
-        label = MODEL_LABELS.get(name, name.capitalize())
-        ax.plot(fpr, tpr, color=color,
-                lw=2.8 if name == "xgb" else 1.8,
-                ls="-" if name == "xgb" else "--",
-                label=f"{label} (AUC = {auc_val:.3f})")
+        ax.plot(
+            fpr, tpr,
+            lw=2.8 if name in {"xgb", "xgboost"} else 1.8,
+            ls="-" if name in {"xgb", "xgboost"} else "--",
+            label=f"{MODEL_LABELS.get(name, name)} (AUC = {auc_val:.3f})",
+        )
 
     ax.plot([0, 1], [0, 1], "k:", lw=1.2, label="Random Chance")
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1.02)
-    ax.set_xlabel("False Positive Rate", fontsize=10)
-    ax.set_ylabel("True Positive Rate", fontsize=10)
-    ax.set_title("ROC Curves \u2014 Held-Out YC Test Set (W21\u2013S24)",
-                 fontsize=11, fontweight="bold")
-    ax.legend(fontsize=8, loc="lower right", framealpha=0.9)
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_title("ROC Curves — Held-Out YC Test Cohort (W21–S24)", fontweight="bold")
+    ax.legend(fontsize=8, loc="lower right")
     plt.tight_layout()
     out = FIG_DIR / "roc_curves.png"
     plt.savefig(out, dpi=300, bbox_inches="tight")
@@ -72,72 +68,78 @@ def plot_roc_curves():
     print(f"Saved -> {out}")
 
 
+def _load_heldout_raw():
+    df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet").copy()
+    if "batch_year_encoded" not in df.columns:
+        raise ValueError("batch_year_encoded is required for temporal SHAP analysis.")
+    years = pd.to_numeric(df["batch_year_encoded"], errors="coerce")
+    return df[years >= 2021].copy()
+
+
 def plot_shap_importance():
     try:
         import shap
-        import joblib
     except ImportError:
-        print("shap/joblib not installed. Skipping SHAP plot.")
+        print("SHAP is not installed. Skipping SHAP plot.")
         return
 
-    xgb_path = MODEL_DIR / "xgb.pkl"
-    if not xgb_path.exists():
+    model_path = MODEL_DIR / "xgboost.pkl"
+    if not model_path.exists():
+        # Backward-compatible artifact name.
+        model_path = MODEL_DIR / "xgb.pkl"
+    if not model_path.exists():
         print("XGBoost model not found. Run trainer.py first.")
         return
 
-    df = pd.read_parquet(PROCESSED_DIR / "yife_features.parquet")
+    df = _load_heldout_raw()
+    skip = {"company", "success", "batch"}
+    X = df[[c for c in df.columns if c not in skip]]
+    model = joblib.load(model_path)
 
-    for col in df.select_dtypes(include=["object", "string", "category"]).columns:
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
+    # Current trainer saves a sklearn Pipeline with preprocessing + model.
+    if hasattr(model, "named_steps"):
+        preprocessor = model.named_steps["preprocess"]
+        estimator = model.named_steps["model"]
+        X_transformed = preprocessor.transform(X)
+        feature_names = preprocessor.get_feature_names_out()
+    else:
+        # Backward-compatible path for legacy bare XGBoost artifacts.
+        estimator = model
+        X_transformed = X.astype(float).fillna(0).values
+        feature_names = np.asarray(X.columns)
 
-    skip   = {"company", "success", "batch"}
-    X_cols = [c for c in df.columns if c not in skip]
-    X = df[X_cols].astype(float).fillna(0).values
-
-    model = joblib.load(xgb_path)
-
-    # XGBoost 2.x + SHAP compatibility fix:
-    # shap.TreeExplainer(XGBClassifier) raises ValueError on base_score format.
-    # Passing the underlying Booster object bypasses this issue.
     try:
-        booster = model.get_booster()
+        booster = estimator.get_booster()
         explainer = shap.TreeExplainer(booster)
-    except Exception as e:
-        print(f"SHAP explainer failed: {e}. Skipping SHAP plot.")
+        shap_vals = explainer.shap_values(X_transformed)
+    except Exception as exc:
+        print(f"SHAP explainer failed: {exc}. Skipping SHAP plot.")
         return
 
-    shap_vals = explainer.shap_values(X)
-    mean_abs  = np.abs(shap_vals).mean(axis=0)
+    if isinstance(shap_vals, list):
+        shap_vals = shap_vals[0]
+    mean_abs = np.abs(shap_vals).mean(axis=0)
 
     feat_df = (
-        pd.DataFrame({"feature": X_cols, "mean_abs_shap": mean_abs})
+        pd.DataFrame({"feature": feature_names, "mean_abs_shap": mean_abs})
         .sort_values("mean_abs_shap", ascending=False)
         .head(10)
         .reset_index(drop=True)
     )
 
-    def _color(v):
-        if v >= 0.12: return "#1d4ed8"
-        if v >= 0.07: return "#3b82f6"
-        return "#93c5fd"
-
     labels = feat_df["feature"].tolist()[::-1]
     values = feat_df["mean_abs_shap"].tolist()[::-1]
-    colors = [_color(v) for v in values]
-    y_pos  = np.arange(len(feat_df))
+    y_pos = np.arange(len(feat_df))
 
     fig, ax = plt.subplots(figsize=(5.8, 4.2), dpi=300)
-    ax.barh(y_pos, values, color=colors, height=0.65, edgecolor="white")
+    ax.barh(y_pos, values, height=0.65)
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=9)
-    ax.set_xlabel("Mean |SHAP| Value", fontsize=10)
-    ax.set_title("SHAP Global Feature Importance \u2014 XGBoost (YIFE)",
-                 fontsize=11, fontweight="bold")
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_xlabel("Mean |SHAP| Value")
+    ax.set_title("SHAP Global Feature Importance — XGBoost (YIFE)", fontweight="bold")
     for i, v in enumerate(values):
         ax.text(v + 0.003, i, f"{v:.3f}", va="center", fontsize=8)
-    ax.set_axisbelow(True)
-    ax.xaxis.grid(True, color="#e5e7eb", linewidth=0.7)
+    ax.xaxis.grid(True, linewidth=0.7)
     plt.tight_layout()
     out = FIG_DIR / "shap_importance.png"
     plt.savefig(out, dpi=300, bbox_inches="tight")
