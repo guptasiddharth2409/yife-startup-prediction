@@ -1,10 +1,21 @@
-# Paper
+# Published Paper
 
-This paper is published in the **Cureus Journal of Computer Science** (Part of Springer Nature).
+This repository accompanies the published article:
 
-> *Previously presented at PTESM 2026, April 10–11, 2026, Greater Noida, India.*
+**Predicting Startup Outcomes Using Explainable Machine Learning and Y Combinator-Inspired Feature Engineering**
 
-The final accepted manuscript PDF will be uploaded here once Cureus assigns the DOI and bibliographic metadata.
+**Authors:** Siddharth Gupta, Pratham Namdev, Shubham Nagar, Sunny Singh, Anjali Deshwal
+
+Published in the **Cureus Journal of Computer Science**, September 1, 2026.
+
+- **DOI:** https://doi.org/10.7759/s44389-026-00254-0
+- **Volume:** 3
+- **Article identifier:** es44389-026-00254-0
+- **Publisher:** Cureus / Springer Nature
+
+The work was previously presented at PTESM 2026, April 10–11, 2026, Greater Noida, India.
+
+> The repository does not redistribute the original research dataset. See [`../data/README.md`](../data/README.md) for data availability and reproducibility guidance.
 
 ---
 
@@ -12,33 +23,37 @@ The final accepted manuscript PDF will be uploaded here once Cureus assigns the 
 
 ```bibtex
 @article{gupta2026yife,
-  title     = {Predicting Early-Stage Startup Success Using ML:
-               A YC-Inspired Feature Engineering Approach},
-  author    = {Gupta, Siddharth and Namdev, Pratham and Nagar, Shubham
-               and Singh, Sunny and Deshwal, Anjali},
-  journal   = {Cureus Journal of Computer Science},
-  publisher = {Springer Nature},
-  year      = {2026}
+  title   = {Predicting Startup Outcomes Using Explainable Machine Learning and Y Combinator-Inspired Feature Engineering},
+  author  = {Gupta, Siddharth and Namdev, Pratham and Nagar, Shubham and Singh, Sunny and Deshwal, Anjali},
+  journal = {Cureus Journal of Computer Science},
+  volume  = {3},
+  year    = {2026},
+  doi     = {10.7759/s44389-026-00254-0}
 }
 ```
 
-> **Note:** DOI, volume, issue, and article number will be added once officially assigned by Cureus.
+---
+
+## Abstract-level Summary
+
+The study introduces **YIFE (YC-Inspired Feature Engineering)**, a domain-specific framework combining accelerator cohort context, founder/team characteristics, technical activity, industry, geography, funding, and investor-network signals. Five classifiers were evaluated on a curated dataset of **4,323 YC-funded companies spanning 2005–2024** using a temporal train/test design. XGBoost with YIFE achieved **F1 = 0.85** and **AUROC = 0.91** on the held-out W21–S24 cohort (n = 863). SHAP analysis was used to quantify relative feature-attribution magnitude.
+
+The published paper frames YIFE as a **retrospective, domain-contextualized classification approach** rather than a strict ex-ante forecasting tool because some funding and investor-network predictors can be observed after the initial YC stage and may overlap conceptually with the outcome definition.
 
 ---
 
-## Abstract
-
-Predicting startup success remains a challenging problem due to high uncertainty and limited early-stage signals. This paper introduces YIFE (YC-Inspired Feature Engineering), a domain-specific feature construction framework trained on 4,323 Y Combinator companies from 2005–2024. YIFE constructs 14 structured features across six signal categories: funding momentum, team quality, technical depth, batch context, industry, and geography. Evaluated across five classifiers, YIFE-enhanced XGBoost achieves an F1-score of 0.85 and AUROC of 0.91, outperforming raw Crunchbase features by +19 F1 points. SHAP analysis reveals funding round count, batch year market conditions, and team size as the dominant predictors — while prior FAANG experience turns out not to be a reliable signal.
-
----
-
-## Research Impact
+## Published Results
 
 | Metric | Value |
-|---|---|
-| Best Accuracy | 86% (XGBoost + YIFE) |
-| Best F1-Score | 0.85 |
-| Best AUROC | 0.91 |
-| Dataset Size | 4,323 YC-funded startups (2005–2024) |
-| Test Cohort | W21–S24 (n=863) |
-| Improvement over B1 baseline | +19 F1 points |
+|---|---:|
+| Best model | XGBoost + YIFE |
+| Accuracy | 0.86 |
+| Precision | 0.85 |
+| Recall | 0.85 |
+| F1-score | 0.85 |
+| AUROC | 0.91 |
+| Held-out cohort | W21–S24 |
+| Held-out sample | 863 companies |
+| F1 improvement vs. generic B1 baseline | +0.19 |
+
+See the main repository README for the complete model comparison and reproducibility instructions.
